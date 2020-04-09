@@ -1,0 +1,102 @@
+body {
+    background: #dddddd;
+}
+
+.device {
+    position: relative;
+    margin: auto;
+    width: 300px;
+    height: 400px;
+    margin-top: 200px;
+    background: #306082;
+    border-radius: 20px;
+}
+
+.device-screen {
+    position: absolute;
+    margin: 28px;
+    width: 244px;
+    image-rendering: crisp-edges;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: pixelated;
+}
+
+.device-screen > canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.device-button-a {
+    position: absolute;
+    margin-top: 295px;
+    margin-left: 165px;
+}
+
+.device-button-b {
+    position: absolute;
+    margin-top: 245px;
+    margin-left: 215px;
+}
+
+.round-button {
+    background: #222034;
+    color: #9badb7;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 0px;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+.device-button-l {
+    position: absolute;
+    margin-top: 280px;
+    margin-left: 35px;
+}
+
+.device-button-u {
+    position: absolute;
+    margin-top: 250px;
+    margin-left: 65px;
+}
+
+.device-button-r {
+    position: absolute;
+    margin-top: 280px;
+    margin-left: 95px;
+}
+
+.device-button-d {
+    position: absolute;
+    margin-top: 310px;
+    margin-left: 65px;
+}
+
+.arrow-button {
+    background: #222034;
+    color: #9badb7;
+    width: 30px;
+    height: 30px;
+    border-radius: 10%;
+    border: 0px;
+    font-size: 15px;
+}
+
+.device-button-s {
+    position: absolute;
+    margin-top: 370px;
+    margin-left: 125px;
+}
+
+.start-button {
+    background: #222034;
+    color: #9badb7;
+    width: 50px;
+    height: 15px;
+    border-radius: 10%;
+    border: 0px;
+    font-size: 8px;
+    font-weight: bold;
+}

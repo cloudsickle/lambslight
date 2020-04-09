@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "lib": [
+            "ES6",
+            "DOM"
+        ],
+        "module": "ES6",
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true,
+        "outDir": "../js",
+        "sourceMap": true,
+        "strict": true,
+        "target": "ES2015",
+    }
+}

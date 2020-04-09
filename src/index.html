@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Follower</title>
+        <meta charset='utf-8'>
+        <link rel='stylesheet' href='styles.css' type='text/css'>
+    </head>
+    <body>
+        <div class='device'>
+            <div class='device-screen'>
+                <canvas id='background_layer' width='240' height='160' style='border: 2px solid #000000;'></canvas>
+                <canvas id='mainobject_layer' width='240' height='160' style='border: 2px solid #000000;'></canvas>
+                <canvas id='characters_layer' width='240' height='160' style='border: 2px solid #000000;'></canvas>
+                <canvas id='foreground_layer' width='240' height='160' style='border: 2px solid #000000;'></canvas>
+            </div>
+            <button id='btn-l' class='device-button-l arrow-button'>&#x25C4;</button>
+            <button id='btn-u' class='device-button-u arrow-button'>&#x25B2;</button>
+            <button id='btn-r' class='device-button-r arrow-button'>&#x25BA;</button>
+            <button id='btn-d' class='device-button-d arrow-button'>&#x25BC;</button>
+            <button id='btn-a' class='device-button-a round-button'>A</button>
+            <button id='btn-b' class='device-button-b round-button'>B</button>
+            <button id='btn-s' class='device-button-s start-button'>START</button>
+        </div>
+        <script type='module' src='./js/main.js'></script>
+    </body>
+</html>
