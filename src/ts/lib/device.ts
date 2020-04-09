@@ -36,7 +36,7 @@ CanvasRenderingContext2D.prototype.fade = function(
 
             opacity += 1;
 
-            if (Math.abs(opacity) == 101) {
+            if (Math.abs(opacity) === 101) {
                 clearInterval(interval);
                 this.clear();
                 resolve();
@@ -214,35 +214,35 @@ export class GameInput {
                 break;
         }
 
-        this.pressOrRelease(button, event.type == 'keydown');
+        this.pressOrRelease(button, event.type === 'keydown');
     }
 
     private handleMouseA(event: MouseEvent) {
-        this.pressOrRelease(GameButton.A, event.type == 'mousedown');
+        this.pressOrRelease(GameButton.A, event.type === 'mousedown');
     }
 
     private handleMouseB(event: MouseEvent) {
-        this.pressOrRelease(GameButton.B, event.type == 'mousedown');
+        this.pressOrRelease(GameButton.B, event.type === 'mousedown');
     }
 
     private handleMouseDown(event: MouseEvent) {
-        this.pressOrRelease(GameButton.Down, event.type == 'mousedown');
+        this.pressOrRelease(GameButton.Down, event.type === 'mousedown');
     }
 
     private handleMouseLeft(event: MouseEvent) {
-        this.pressOrRelease(GameButton.Left, event.type == 'mousedown');
+        this.pressOrRelease(GameButton.Left, event.type === 'mousedown');
     }
 
     private handleMouseRight(event: MouseEvent) {
-        this.pressOrRelease(GameButton.Right, event.type == 'mousedown');
+        this.pressOrRelease(GameButton.Right, event.type === 'mousedown');
     }
 
     private handleMouseStart(event: MouseEvent) {
-        this.pressOrRelease(GameButton.Start, event.type == 'mousedown');
+        this.pressOrRelease(GameButton.Start, event.type === 'mousedown');
     }
 
     private handleMouseUp(event: MouseEvent) {
-        this.pressOrRelease(GameButton.Up, event.type == 'mousedown');
+        this.pressOrRelease(GameButton.Up, event.type === 'mousedown');
     }
     
     private pressOrRelease(button: GameButton, press: boolean) {

@@ -50,7 +50,7 @@ export class Game {
             // sprite just turns around in place, the position stays constant.
             // So we only deal with scene rendering if the sprite direction
             // hasn't changed.
-            if (newDirection == this.sprite.direction) {
+            if (newDirection === this.sprite.direction) {
                 // TODO: Ensure sprite can move to new position.
                 // TODO: Move sprite in scene.
                 // TODO: Re-render scene in this case.

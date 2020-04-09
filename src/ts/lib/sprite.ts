@@ -17,9 +17,9 @@ export class Sprite {
 
     }
 
-    loadSpritesheet(src: string) {
-        return new Promise((resolves) => {
-            this.spritesheet.onload = () => resolves();
+    loadSpritesheet(src: string): Promise<void> {
+        return new Promise((resolve) => {
+            this.spritesheet.onload = () => resolve();
             this.spritesheet.src    = src;
         });
     }
@@ -38,7 +38,7 @@ export class Sprite {
                                         72, 16, 16);
     }
 
-    private getWalkFrame() {
+    private getWalkFrame(): number {
         let frame = 0;
         let directionIndex = SPRITESHEET_DIRECTIONS.indexOf(this.direction);
 
