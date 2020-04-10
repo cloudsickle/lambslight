@@ -29,10 +29,12 @@ export class Sprite {
         let sx = SPRITESHEET_DIRECTIONS.indexOf(this.direction)*16;
         let sy = this.getWalkFrame()*16;
 
-        // TODO: Allow sprite rendering not in the center of the screen.
-        // Many of these parameters will become dynamic, and factor in
-        // the sprite location. This will allow for scenes where the map
-        // is frozen and the character walks to a specific location.
+        /*
+         * TODO: Allow sprite rendering not in the center of the screen.
+         * Many of these parameters will become dynamic, and factor in
+         * the sprite location. This will allow for scenes where the map
+         * is frozen and the character walks to a specific location.
+         */
         gameScreen.characters.clearRect(112, 72, 16, 16);
         gameScreen.characters.drawImage(this.spritesheet, sx, sy, 16, 16, 112,
                                         72, 16, 16);
@@ -51,11 +53,13 @@ export class Sprite {
             }
         }
 
-        // If the current frame is 2, we want to return 0 because the first and
-        // third frames are the same image. If it's 3, we return 2 because the
-        // spritesheet only stores each frame once so the third row is the
-        // fourth frame in the sequence.
-        // 0 -> 0, 1 -> 1, 2 -> 0, 3 -> 2
+        /*
+         * If the current frame is 2, we want to return 0 because the first and
+         * third frames are the same image. If it's 3, we return 2 because the
+         * spritesheet only stores each frame once so the third row is the
+         * fourth frame in the sequence.
+         * 0 -> 0, 1 -> 1, 2 -> 0, 3 -> 2
+         */
         return (frame % 2)*(1 + Math.floor(frame/2));
     }
 }

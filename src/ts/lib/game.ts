@@ -44,24 +44,29 @@ export class Game {
                 default:
                     break;
             }
-            this.sprite.direction = newDirection;  // TODO: Verify copy by value.
 
-            // If the new direction is different than the current direction, the
-            // sprite just turns around in place, the position stays constant.
-            // So we only deal with scene rendering if the sprite direction
-            // hasn't changed.
-            if (newDirection === this.sprite.direction) {
+            /*
+             * If the new direction is different than the current direction, the
+             * sprite just turns around in place, the position stays constant.
+             * So we only deal with scene rendering if the sprite direction
+             * hasn't changed.
+             */
+            if (this.sprite.direction === newDirection) {
                 // TODO: Ensure sprite can move to new position.
                 // TODO: Move sprite in scene.
                 // TODO: Re-render scene in this case.
+            } else {
+                this.sprite.direction = newDirection;
             }
 
             this.sprite.render(this.screen);
 
-            // Slow down the character when walking. You don't want to walk at
-            // the speed of the game loop, it's way too fast. You also don't
-            // want to slow down the speed of the game loop because you need to
-            // listen for quick input events.
+            /*
+             * Slow down the character when walking. You don't want to walk at
+             * the speed of the game loop, it's way too fast. You also don't
+             * want to slow down the speed of the game loop because you need to
+             * listen for quick input events.
+             */
             await utils.sleep(1000/WALK_FPS);
         }
 
