@@ -26,7 +26,6 @@ export class Game {
 
     async loop() {
         if (this.input.isArrowPressed()) {
-
             let newDirection = utils.Direction.N;  // Arbitrary intial value.
             switch (this.input.lastPressedArrow) {
                 case device.GameButton.Down:
