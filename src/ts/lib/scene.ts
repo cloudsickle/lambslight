@@ -1,102 +1,83 @@
 import * as device from './device.js';
 import * as utils  from './utils.js';
 
+const TSIZE = 8;
+
 export class Scene {
     isRendered : boolean;
-    map        : SceneMap | null;
+    lastTopLeft: utils.TilePosition | null;
+    map        : SceneMap;
     tiles      : HTMLImageElement;
-    lastTopLeft: utils.Position | null;
 
-    // FIXME: Move to load() method or use .ready attrirbute to allow load time.
-    constructor(sceneAsset: string) {
-        this.isRendered = false;
-
-        let req = new XMLHttpRequest();
-        req.open('GET', '../../assets/scenes/' + sceneAsset);
-        req.responseType = 'text';
-        req.send();
-        req.onload = () => {
-            this.map = <SceneMap> JSON.parse(req.response);
-        }
-        req.onerror = () => {
-            throw 'Error loading scene.'
-        }
-
+    constructor(map: SceneMap, tiles: HTMLImageElement) {
+        this.isRendered  = false;
         this.lastTopLeft = null;
-
-        this.tiles     = new Image();
-        this.tiles.src = this.map.imageAsset;
+        this.map         = map;
+        this.tiles       = tiles;
     }
 
-    canMoveTo(position: utils.Position): boolean {
+    canMoveTo(position: utils.TilePosition): boolean {
         return this.map.collision[this.tileIndex(position.x, position.y)] === 0;
     }
 
     // TODO: Should the rendering responsibility be moved elsewhere? Camera?
-    render(screen: device.GameScreen, topLeft: utils.Position): void {
+    render(screen: device.GameScreen, topLeft: utils.TilePosition): void {
         /*
          * There are two cases in rendering the screen. Either the screen has
          * already been rendered, or it's blank. If the screen is blank, render
          * the map to the entire screen. If the screen has already been
-         * rendered, then it is shifted and two rectangles are rendered to fill
-         * in the remaining screen area.
+         * rendered, then it is shifted and the unrendered area is filled in.
+         * 
+         * This method (and others) depend on three assumptions:
+         *     1. Partial map tiles are never rendered.
+         *     2. All map tiles are 8x8 px squares.
+         *     3. The map is only shifted one row or column at a time.
          */
         if (this.lastTopLeft === null) {
             this.renderRect(
                 screen, 
                 topLeft,
-                screen.width /this.map.tSize,
-                screen.height/this.map.tSize
+                screen.width /TSIZE,
+                screen.height/TSIZE
             );
         } else {
-            // FIXME: Calculate hx, hy, vx, vy so code below works.
             let dx = this.lastTopLeft.x - topLeft.x;
             let dy = this.lastTopLeft.y - topLeft.y;
 
-            let hx: number = 0;
-            let hy: number = 0;
-            let vx: number = 0;
-            let vy: number = 0;
-            if (dx > 0) {
-                hx = topLeft.x + screen.width - dx;
-                vx = 0;
-            } else {
-                hx = topLeft.x + dx;
-                vx = 0;
-            }
-            if (dy > 0) {
-                hy = 0;
-                vy = 0;
-            } else {
-                hy = 0;
-                vy = 0;
+            let gapTopLeft = <utils.TilePosition> { ...this.lastTopLeft };
+            let hTiles = Math.abs(dx) === TSIZE ? 1 : 0;
+            let vTiles = Math.abs(dy) === TSIZE ? 1 : 0;
+
+            switch (hTiles + vTiles) {
+                case 0:
+                    console.error('Attempted to render non-TSIZE shift.');
+                    throw 'Attempted to render non-TSIZE shift.'
+                case 2:
+                    console.error('Attempted to render diagonal shift.')
+                    throw 'Attempted to render diagonal shift.'
+                default:
+                    if (dx === -TSIZE) { gapTopLeft.x = screen.width /TSIZE - 1; }
+                    if (dy === -TSIZE) { gapTopLeft.y = screen.height/TSIZE - 1; }
+                    break;
             }
 
-            screen.background.shift(dx, dy);
-            screen.mainobject.shift(dx, dy);
-            // Fill in the horizontal area.
+            screen.background.shift(dx*TSIZE, dy*TSIZE);
+            screen.mainobject.shift(dx*TSIZE, dy*TSIZE);
+
             this.renderRect(
                 screen, 
-                new utils.Position(hx, hy),
-                screen.width/this.map.tSize,
-                Math.abs(dy)/this.map.tSize
-            );
-            // Fill in the vertical area.
-            this.renderRect(
-                screen, 
-                new utils.Position(vx, vy),
-                Math.abs(dx)/this.map.tSize,
-                (screen.height - Math.abs(dy))/this.map.tSize
+                gapTopLeft,
+                hTiles,
+                vTiles
             );
         }
 
-        // TODO: Second rendering method needs to work, then uncomment below.
-        // this.lastTopLeft = { ...topLeft };  // TODO: Is spread needed?
+        // TODO: This may not be the best way to do this in TypeScript.
+        this.lastTopLeft = <utils.TilePosition> { ...topLeft };
     }
 
-    renderRect(screen: device.GameScreen, topLeft: utils.Position, hTiles: number,
+    renderRect(screen: device.GameScreen, topLeft: utils.TilePosition, hTiles: number,
                vTiles: number): void {
-        const tSize = this.map.tSize;
         const endX  = topLeft.x + hTiles;
         const endY  = topLeft.y + vTiles;
 
@@ -108,27 +89,27 @@ export class Scene {
 
                 screen.background.drawImage(
                     this.tiles,
-                    (bgTile % tSize)*tSize,
-                    Math.floor(bgTile/tSize)*tSize,
-                    tSize,
-                    tSize,
-                    x*tSize,
-                    y*tSize,
-                    tSize,
-                    tSize
+                    (bgTile % TSIZE)*TSIZE,
+                    Math.floor(bgTile/TSIZE)*TSIZE,
+                    TSIZE,
+                    TSIZE,
+                    x*TSIZE,
+                    y*TSIZE,
+                    TSIZE,
+                    TSIZE
                 );
 
                 if (moTile > 0) {
                     screen.background.drawImage(
                         this.tiles,
-                        (moTile % tSize)*tSize,
-                        Math.floor(moTile/tSize)*tSize,
-                        tSize,
-                        tSize,
-                        x*tSize,
-                        y*tSize,
-                        tSize,
-                        tSize
+                        (moTile % TSIZE)*TSIZE,
+                        Math.floor(moTile/TSIZE)*TSIZE,
+                        TSIZE,
+                        TSIZE,
+                        x*TSIZE,
+                        y*TSIZE,
+                        TSIZE,
+                        TSIZE
                     );
                 }
             }
@@ -142,6 +123,27 @@ export class Scene {
     }
 }
 
+/**
+ * Create a new Scene from JSON Scene data.
+ */
+export async function load(sceneAsset: string): Promise<Scene> {
+    let req = new XMLHttpRequest();
+    req.open('GET', '../../assets/scenes/' + sceneAsset);
+    req.responseType = 'text';
+    req.send();
+    req.onerror = () => {
+        throw 'Error loading scene.'
+    };
+    req.onload = () => {
+        let map   = <SceneMap> JSON.parse(req.response);
+        let tiles = new Image();
+        tiles.onload = () => {
+            return new Scene(map, tiles);
+        };
+        tiles.src = map.imageAsset;
+    };
+}
+
 interface SceneMap {
     background: number[];
     collision : number[];
@@ -150,6 +152,5 @@ interface SceneMap {
     mainobject: number[];
     startTopX : number;
     startTopY : number;
-    tSize     : number;
     width     : number;
 }

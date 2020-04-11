@@ -25,6 +25,12 @@ export class Position {
 }
 
 /**
+ * Poisiton class in tile units. Used for type-safety.
+ */
+export type TilePosition = Position;
+
+
+/**
  * Convert a hex color string (#000000) to r, g, b values.
  */
 export function hexToRGB(colorcode: string): [number, number, number] {
