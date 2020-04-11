@@ -1,19 +1,25 @@
 import * as device from './device.js';
+import * as scene  from './scene.js';
 import * as sprite from './sprite.js';
 import * as utils  from './utils.js';
 
 const WALK_FPS = 2.5;
 
 export class Game {
-    input : device.GameInput;
-    screen: device.GameScreen;
-    sprite: sprite.Sprite;
+    input  : device.GameInput;
+    scene  : scene.Scene;
+    screen : device.GameScreen;
+    sprite : sprite.Sprite;
+    topLeft: utils.Position;
     
-    constructor() {
+    constructor(intialSceneAsset: string) {
         try {
-            this.input  = new device.GameInput();
-            this.screen = new device.GameScreen();
-            this.sprite = new sprite.Sprite();
+            this.input   = new device.GameInput();
+            this.scene   = new scene.Scene(intialSceneAsset);  // TODO: Slow...
+            this.screen  = new device.GameScreen();
+            this.sprite  = new sprite.Sprite();
+            this.topLeft = new utils.Position(this.scene.map.startTopX,
+                                              this.scene.map.startTopY);
         }
         catch(error) {
             throw error;
@@ -49,11 +55,15 @@ export class Game {
              * sprite just turns around in place, the position stays constant.
              * So we only deal with scene rendering if the sprite direction
              * hasn't changed.
+             * 
+             * All this is assuming the camera always follows the main character
+             * which is true now just for testing.
              */
             if (this.sprite.direction === newDirection) {
                 // TODO: Ensure sprite can move to new position.
+                this.moveCamera(newDirection);
                 // TODO: Move sprite in scene.
-                // TODO: Re-render scene in this case.
+                this.scene.render(this.screen, this.topLeft);
             } else {
                 this.sprite.direction = newDirection;
             }
@@ -70,5 +80,24 @@ export class Game {
         }
 
         window.requestAnimationFrame(() => this.loop());
+    }
+
+    moveCamera(direction: utils.Direction) {
+        switch (direction) {
+            case utils.Direction.N:
+                this.topLeft.y -= 1;
+                break;
+            case utils.Direction.E:
+                this.topLeft.x += 1;
+                break;
+            case utils.Direction.S:
+                this.topLeft.y += 1;
+                break;
+            case utils.Direction.W:
+                this.topLeft.x -= 1;
+                break;
+            default:
+                break;
+        }
     }
 }

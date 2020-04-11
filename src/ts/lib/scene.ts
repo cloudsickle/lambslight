@@ -2,17 +2,27 @@ import * as device from './device.js';
 import * as utils  from './utils.js';
 
 export class Scene {
-    isRendered: boolean;
-    map       : SceneMap;
-    tiles     : HTMLImageElement;
-    topLeft   : utils.Position;
+    isRendered : boolean;
+    map        : SceneMap | null;
+    tiles      : HTMLImageElement;
+    lastTopLeft: utils.Position | null;
 
     // FIXME: Move to load() method or use .ready attrirbute to allow load time.
     constructor(sceneAsset: string) {
         this.isRendered = false;
 
-        this.map = <SceneMap> JSON.parse(sceneAsset);
-        this.topLeft = new utils.Position(this.map.startTopX, this.map.startTopY);
+        let req = new XMLHttpRequest();
+        req.open('GET', '../../assets/scenes/' + sceneAsset);
+        req.responseType = 'text';
+        req.send();
+        req.onload = () => {
+            this.map = <SceneMap> JSON.parse(req.response);
+        }
+        req.onerror = () => {
+            throw 'Error loading scene.'
+        }
+
+        this.lastTopLeft = null;
 
         this.tiles     = new Image();
         this.tiles.src = this.map.imageAsset;
@@ -23,27 +33,78 @@ export class Scene {
     }
 
     // TODO: Should the rendering responsibility be moved elsewhere? Camera?
-    moveView(screen: device.GameScreen, dx: number, dy: number): void {
-        this.topLeft.x += dx;
-        this.topLeft.y += dy;
-
-        if (!this.isRendered) {
-            this.renderFull(screen);
+    render(screen: device.GameScreen, topLeft: utils.Position): void {
+        /*
+         * There are two cases in rendering the screen. Either the screen has
+         * already been rendered, or it's blank. If the screen is blank, render
+         * the map to the entire screen. If the screen has already been
+         * rendered, then it is shifted and two rectangles are rendered to fill
+         * in the remaining screen area.
+         */
+        if (this.lastTopLeft === null) {
+            this.renderRect(
+                screen, 
+                topLeft,
+                screen.width /this.map.tSize,
+                screen.height/this.map.tSize
+            );
         } else {
-            this.renderShift(screen, dx, dy);
+            // FIXME: Calculate hx, hy, vx, vy so code below works.
+            let dx = this.lastTopLeft.x - topLeft.x;
+            let dy = this.lastTopLeft.y - topLeft.y;
+
+            let hx: number = 0;
+            let hy: number = 0;
+            let vx: number = 0;
+            let vy: number = 0;
+            if (dx > 0) {
+                hx = topLeft.x + screen.width - dx;
+                vx = 0;
+            } else {
+                hx = topLeft.x + dx;
+                vx = 0;
+            }
+            if (dy > 0) {
+                hy = 0;
+                vy = 0;
+            } else {
+                hy = 0;
+                vy = 0;
+            }
+
+            screen.background.shift(dx, dy);
+            screen.mainobject.shift(dx, dy);
+            // Fill in the horizontal area.
+            this.renderRect(
+                screen, 
+                new utils.Position(hx, hy),
+                screen.width/this.map.tSize,
+                Math.abs(dy)/this.map.tSize
+            );
+            // Fill in the vertical area.
+            this.renderRect(
+                screen, 
+                new utils.Position(vx, vy),
+                Math.abs(dx)/this.map.tSize,
+                (screen.height - Math.abs(dy))/this.map.tSize
+            );
         }
+
+        // TODO: Second rendering method needs to work, then uncomment below.
+        // this.lastTopLeft = { ...topLeft };  // TODO: Is spread needed?
     }
 
-    renderFull(screen: device.GameScreen): void {
+    renderRect(screen: device.GameScreen, topLeft: utils.Position, hTiles: number,
+               vTiles: number): void {
         const tSize = this.map.tSize;
-        const endX  = this.topLeft.x + (screen.width /this.map.tSize);
-        const endY  = this.topLeft.y + (screen.height/this.map.tSize);
+        const endX  = topLeft.x + hTiles;
+        const endY  = topLeft.y + vTiles;
 
-        for (let x = this.topLeft.x; x < endX; x++) {
-            for (let y = this.topLeft.y; y < endY; y++) {
+        for (let x = topLeft.x; x < endX; x++) {
+            for (let y = topLeft.y; y < endY; y++) {
                 const tIndex = this.tileIndex(x, y);
                 const bgTile = this.map.background[tIndex];
-                const fgTile = this.map.foreground[tIndex];
+                const moTile = this.map.mainobject[tIndex];
 
                 screen.background.drawImage(
                     this.tiles,
@@ -57,11 +118,11 @@ export class Scene {
                     tSize
                 );
 
-                if (fgTile > 0) {
+                if (moTile > 0) {
                     screen.background.drawImage(
                         this.tiles,
-                        (fgTile % tSize)*tSize,
-                        Math.floor(fgTile/tSize)*tSize,
+                        (moTile % tSize)*tSize,
+                        Math.floor(moTile/tSize)*tSize,
                         tSize,
                         tSize,
                         x*tSize,
@@ -76,18 +137,6 @@ export class Scene {
         this.isRendered = true;
     }
 
-    renderShift(screen: device.GameScreen, dx:number, dy: number): void {
-        screen.background.shift(dx, dy);
-
-        if (dx) {
-            // FIXME: Render new column(s) on left or right.
-        }
-
-        if (dy) {
-            // FIXME: Render new row(s) on top or bottom.
-        }
-    }
-
     tileIndex(x: number, y: number): number {
         return y*this.map.width + x;
     }
@@ -96,9 +145,9 @@ export class Scene {
 interface SceneMap {
     background: number[];
     collision : number[];
-    foreground: number[];
     height    : number;
     imageAsset: string;
+    mainobject: number[];
     startTopX : number;
     startTopY : number;
     tSize     : number;
