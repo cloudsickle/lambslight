@@ -1,7 +1,7 @@
 # Lamb's Light Source
 This document contains instructions for building Lamb's Light, and a high level description of the `src` directory.
 
-# Building Source
+## Building Source
 Before running the commands below, you need to install Git and TypeScript.
 
 ```
