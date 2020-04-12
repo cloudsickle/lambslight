@@ -138,7 +138,7 @@ export class GameInput {
         [GameButton.Start]: false,
         [GameButton.Up   ]: false,
     }
-    lastPressedArrow: GameButton | null = null;
+    arrowStack: GameButton[];
 
     constructor() {
         const buttons = ['btn-a', 'btn-b', 'btn-d', 'btn-l', 'btn-r', 'btn-s',
@@ -166,6 +166,8 @@ export class GameInput {
         // Assign listeners for keyboard events.
         document.addEventListener('keydown', (event) => { this.handleKeyboard(event) });
         document.addEventListener('keyup'  , (event) => { this.handleKeyboard(event) });
+
+        this.arrowStack = [];
     }
 
     isArrowPressed(): boolean {
@@ -181,10 +183,17 @@ export class GameInput {
         return this.pressed[button];
     }
 
+    prioritizedArrow(): GameButton | null {
+        if (this.arrowStack) {
+            return this.arrowStack[0];
+        }
+        return null;
+    }
+
     private handleKeyboard(event: KeyboardEvent) {
         event.preventDefault();
 
-        let button = GameButton.A;  // Initilize with any button.
+        let button: GameButton | null = null;
         switch (event.keyCode) {
             case 37:  // Left arrow.
                 button = GameButton.Left;
@@ -214,7 +223,9 @@ export class GameInput {
                 break;
         }
 
-        this.pressOrRelease(button, event.type === 'keydown');
+        if (button !== null) {
+            this.pressOrRelease(button, event.type === 'keydown');
+        }
     }
 
     private handleMouseA(event: MouseEvent) {
@@ -248,10 +259,16 @@ export class GameInput {
     private pressOrRelease(button: GameButton, press: boolean) {
         this.pressed[button] = press;
 
+        // Special handling for arrows.
+        // FIXME: Still some issues here.
         if (isArrow(button)) {
-            this.lastPressedArrow = button;
-        } else if (!this.isArrowPressed()) {
-            this.lastPressedArrow = null;
+            let index = this.arrowStack.indexOf(button);
+            if (index > -1) {
+                this.arrowStack.splice(index, 1);
+            }
+            if (press) {
+                this.arrowStack.unshift(button);
+            }
         }
     }
 }

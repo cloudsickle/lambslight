@@ -39,7 +39,7 @@ export class Game {
     async loop() {
         if (this.input.isArrowPressed()) {
             let newDirection = utils.Direction.N;  // Arbitrary intial value.
-            switch (this.input.lastPressedArrow) {
+            switch (this.input.prioritizedArrow()) {
                 case device.GameButton.Down:
                     newDirection = utils.Direction.S;
                     break;
@@ -51,6 +51,8 @@ export class Game {
                     break;
                 case device.GameButton.Up:
                     newDirection = utils.Direction.N;
+                    break;
+                case null:
                     break;
                 default:
                     break;
