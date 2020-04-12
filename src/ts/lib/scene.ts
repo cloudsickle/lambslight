@@ -4,13 +4,11 @@ import * as utils  from './utils.js';
 const TSIZE = 8;
 
 export class Scene {
-    isRendered : boolean;
     lastTopLeft: utils.TilePosition | null;
     map        : SceneMap;
     tiles      : HTMLImageElement;
 
     constructor(map: SceneMap, tiles: HTMLImageElement) {
-        this.isRendered  = false;
         this.lastTopLeft = null;
         this.map         = map;
         this.tiles       = tiles;
@@ -44,22 +42,17 @@ export class Scene {
             let dx = this.lastTopLeft.x - topLeft.x;
             let dy = this.lastTopLeft.y - topLeft.y;
 
-            let gapTopLeft = <utils.TilePosition> { ...this.lastTopLeft };
-            let hTiles = Math.abs(dx) === TSIZE ? 1 : 0;
-            let vTiles = Math.abs(dy) === TSIZE ? 1 : 0;
+            let gapTopLeft = <utils.TilePosition> { ...topLeft };
 
-            switch (hTiles + vTiles) {
-                case 0:
-                    console.error('Attempted to render non-TSIZE shift.');
-                    throw 'Attempted to render non-TSIZE shift.'
-                case 2:
-                    console.error('Attempted to render diagonal shift.')
-                    throw 'Attempted to render diagonal shift.'
-                default:
-                    if (dx === -TSIZE) { gapTopLeft.x = screen.width /TSIZE - 1; }
-                    if (dy === -TSIZE) { gapTopLeft.y = screen.height/TSIZE - 1; }
-                    break;
+            if ((Math.abs(dx) + Math.abs(dy)) === 1) {
+                if (dx === -1) { gapTopLeft.x += screen.width /TSIZE - 1; }
+                if (dy === -1) { gapTopLeft.y += screen.height/TSIZE - 1; }
+            } else {
+                console.error('Error rendering screen shift.');
+                throw 'Error rendering screen shift.'
             }
+
+            console.log(this.lastTopLeft, topLeft, gapTopLeft);
 
             screen.background.shift(dx*TSIZE, dy*TSIZE);
             screen.mainobject.shift(dx*TSIZE, dy*TSIZE);
@@ -67,34 +60,42 @@ export class Scene {
             this.renderRect(
                 screen, 
                 gapTopLeft,
-                hTiles,
-                vTiles
+                Math.max(Math.abs(dy)*(screen.width /TSIZE), 1),
+                Math.max(Math.abs(dx)*(screen.height/TSIZE), 1)
             );
         }
 
-        // TODO: This may not be the best way to do this in TypeScript.
         this.lastTopLeft = <utils.TilePosition> { ...topLeft };
     }
 
     renderRect(screen: device.GameScreen, topLeft: utils.TilePosition, hTiles: number,
                vTiles: number): void {
-        const endX  = topLeft.x + hTiles;
-        const endY  = topLeft.y + vTiles;
 
-        for (let x = topLeft.x; x < endX; x++) {
-            for (let y = topLeft.y; y < endY; y++) {
-                const tIndex = this.tileIndex(x, y);
+        let offsetX = 0;
+        let offsetY = 0;
+        if (this.lastTopLeft !== null) {
+            offsetX = Math.max(topLeft.x - this.lastTopLeft.x - 1, 0);
+            offsetY = Math.max(topLeft.y - this.lastTopLeft.y - 1, 0);
+        }
+        
+        for (let i = 0; i < hTiles; i++) {
+            for (let j = 0; j < vTiles; j++) {
+                const tIndex = this.tileIndex(topLeft.x + i, topLeft.y + j);
                 const bgTile = this.map.background[tIndex];
                 const moTile = this.map.mainobject[tIndex];
 
+                console.assert(tIndex < this.map.background.length);
+
                 screen.background.drawImage(
                     this.tiles,
-                    (bgTile % TSIZE)*TSIZE,
-                    Math.floor(bgTile/TSIZE)*TSIZE,
+                    // (bgTile % TSIZE)*TSIZE,  // FIXME: This needs to factor in tilemap width.
+                    bgTile*TSIZE,
+                    // Math.floor(bgTile/TSIZE)*TSIZE,
+                    0,
                     TSIZE,
                     TSIZE,
-                    x*TSIZE,
-                    y*TSIZE,
+                    (i + offsetX)*TSIZE,
+                    (j + offsetY)*TSIZE,
                     TSIZE,
                     TSIZE
                 );
@@ -102,20 +103,18 @@ export class Scene {
                 if (moTile > 0) {
                     screen.background.drawImage(
                         this.tiles,
-                        (moTile % TSIZE)*TSIZE,
+                        (moTile % TSIZE)*TSIZE,  // FIXME: This needs to factor in tilemap width.
                         Math.floor(moTile/TSIZE)*TSIZE,
                         TSIZE,
                         TSIZE,
-                        x*TSIZE,
-                        y*TSIZE,
+                        (i + offsetX)*TSIZE,
+                        (j + offsetY)*TSIZE,
                         TSIZE,
                         TSIZE
                     );
                 }
             }
         }
-
-        this.isRendered = true;
     }
 
     tileIndex(x: number, y: number): number {
@@ -126,31 +125,30 @@ export class Scene {
 /**
  * Create a new Scene from JSON Scene data.
  */
-export async function load(sceneAsset: string): Promise<Scene> {
-    let req = new XMLHttpRequest();
-    req.open('GET', '../../assets/scenes/' + sceneAsset);
-    req.responseType = 'text';
-    req.send();
-    req.onerror = () => {
-        throw 'Error loading scene.'
-    };
-    req.onload = () => {
-        let map   = <SceneMap> JSON.parse(req.response);
-        let tiles = new Image();
-        tiles.onload = () => {
-            return new Scene(map, tiles);
+export function loadScene(sceneAsset: string): Promise<Scene> {
+    return new Promise((resolve) => {
+        let req = new XMLHttpRequest();
+        req.open('GET', '../../assets/scenes/' + sceneAsset);
+        req.responseType = 'text';
+        req.send();
+        req.onload = () => {
+            let map   = <SceneMap> JSON.parse(req.response);
+            let tiles = new Image();
+            tiles.onload = () => {
+                resolve(new Scene(map, tiles));
+            };
+            tiles.src = '../../assets/images/' + map.imageAsset;
         };
-        tiles.src = map.imageAsset;
-    };
+    });
 }
 
 interface SceneMap {
-    background: number[];
-    collision : number[];
-    height    : number;
-    imageAsset: string;
-    mainobject: number[];
-    startTopX : number;
-    startTopY : number;
-    width     : number;
+    background   : number[];
+    collision    : number[];
+    height       : number;
+    imageAsset   : string;
+    mainobject   : number[];
+    startTopLeftX: number;
+    startTopLeftY: number;
+    width        : number;
 }

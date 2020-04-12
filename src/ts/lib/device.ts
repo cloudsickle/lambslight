@@ -159,13 +159,13 @@ export class GameInput {
             if (!button) {
                 throw 'Failed to retrieve device button.';
             }
-            button.addEventListener('mousedown', functions[i]);
-            button.addEventListener('mouseup'  , functions[i]);
+            button.addEventListener('mousedown', (event) => { functions[i](event) });
+            button.addEventListener('mouseup'  , (event) => { functions[i](event) });
         }
 
         // Assign listeners for keyboard events.
-        document.addEventListener('keydown', this.handleKeyboard);
-        document.addEventListener('keyup'  , this.handleKeyboard);
+        document.addEventListener('keydown', (event) => { this.handleKeyboard(event) });
+        document.addEventListener('keyup'  , (event) => { this.handleKeyboard(event) });
     }
 
     isArrowPressed(): boolean {

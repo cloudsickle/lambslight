@@ -17,10 +17,10 @@ export class Sprite {
 
     }
 
-    loadSpritesheet(src: string): Promise<void> {
+    loadSpritesheet(spriteAsset: string): Promise<void> {
         return new Promise((resolve) => {
-            this.spritesheet.onload = () => resolve();
-            this.spritesheet.src    = src;
+            this.spritesheet.onload = () => { resolve() };
+            this.spritesheet.src    = '../../assets/images/' + spriteAsset;
         });
     }
 
