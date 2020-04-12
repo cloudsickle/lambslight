@@ -15,7 +15,13 @@ export class Scene {
     }
 
     canMoveTo(position: utils.TilePosition): boolean {
-        return this.map.collision[this.tileIndex(position.x, position.y)] === 0;
+        // Because sprite occupies four tiles, all need to be walkable.
+        return !(
+               this.map.collision[this.tileIndex(position.x    , position.y    )] === 1
+            || this.map.collision[this.tileIndex(position.x    , position.y + 1)] === 1
+            || this.map.collision[this.tileIndex(position.x + 1, position.y    )] === 1
+            || this.map.collision[this.tileIndex(position.x + 1, position.y + 1)] === 1
+        );
     }
 
     // TODO: Should the rendering responsibility be moved elsewhere? Camera?
@@ -51,8 +57,6 @@ export class Scene {
                 console.error('Error rendering screen shift.');
                 throw 'Error rendering screen shift.'
             }
-
-            console.log(this.lastTopLeft, topLeft, gapTopLeft);
 
             screen.background.shift(dx*TSIZE, dy*TSIZE);
             screen.mainobject.shift(dx*TSIZE, dy*TSIZE);

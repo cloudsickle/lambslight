@@ -3,7 +3,7 @@ import * as scene  from './scene.js';
 import * as sprite from './sprite.js';
 import * as utils  from './utils.js';
 
-const WALK_FPS = 2.5;
+const WALK_FPS = 3;
 
 export class Game {
     input  : device.GameInput;
@@ -64,27 +64,22 @@ export class Game {
              * 
              * All this is assuming the camera always follows the main character
              * which is true now just for testing.
+             *
+             * There are time delays to control walking speed. This is likely 
+             * not the most efficient way to do things. But, the character needs
+             * to move slower than the rAF. The rAF should stay as fast as
+             * possible so the keyboard/mouse events are responsive.
              * 
              * One last note -- the character walks two tiles per move, so that
              * is why the camera and sprite moves are doubled up.
              */
             if (this.sprite.direction === newDirection) {
-                console.log('Moving same direction');
-                // TODO: Ensure sprite can move to new position.
                 this.moveCamera(newDirection);
                 this.sprite.render(this.screen);
-
-                /*
-                * Slow down the character when walking. You don't want to walk at
-                * the speed of the game loop, it's way too fast. You also don't
-                * want to slow down the speed of the game loop because you need to
-                * listen for quick input events.
-                */
                 await utils.sleep(1000/WALK_FPS/2);
 
                 this.moveCamera(newDirection);
                 this.sprite.render(this.screen);
-
                 await utils.sleep(1000/WALK_FPS/2);
             } else {
                 this.sprite.direction = newDirection;
@@ -93,28 +88,42 @@ export class Game {
             }
         }
 
-        // Temporarily stopped.
         window.requestAnimationFrame(() => this.loop());
     }
 
-    moveCamera(direction: utils.Direction) {
+    /**
+     * Moves the background and mainobject layers. Returns true if the camera
+     * was moved, else false indicating there was a collision.
+     */
+    moveCamera(direction: utils.Direction): boolean {
+        let newTopLeft = <utils.TilePosition> { ...this.topLeft! };
+
         switch (direction) {
             case utils.Direction.N:
-                this.topLeft!.y -= 1;
+                newTopLeft.y -= 1;
                 break;
             case utils.Direction.E:
-                this.topLeft!.x += 1;
+                newTopLeft.x += 1;
                 break;
             case utils.Direction.S:
-                this.topLeft!.y += 1;
+                newTopLeft.y += 1;
                 break;
             case utils.Direction.W:
-                this.topLeft!.x -= 1;
+                newTopLeft.x -= 1;
                 break;
             default:
                 break;
         }
 
-        this.scene!.render(this.screen, this.topLeft!);
+        // TODO: This has to change when the sprite isn't always centered.
+        let newSpritePosition = new utils.TilePosition(newTopLeft.x + 14, newTopLeft.y + 9);
+
+        let canMove = this.scene!.canMoveTo(newSpritePosition);
+        if (canMove) {
+            this.topLeft = newTopLeft;
+            this.scene!.render(this.screen, this.topLeft!);
+        }
+
+        return canMove;
     }
 }
