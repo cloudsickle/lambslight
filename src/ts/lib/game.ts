@@ -74,11 +74,20 @@ export class Game {
              * is why the camera and sprite moves are doubled up.
              */
             if (this.sprite.direction === newDirection) {
-                this.moveCamera(newDirection);
+
+                // TODO: This has to change when the sprite is not always centered.
+                let newSpritePosition = this.topLeft!
+                    .copy()
+                    .move(newDirection)
+                    .move(newDirection)
+                    .shift(14, 9);
+                let canMove = this.scene!.canMoveTo(newSpritePosition);
+                
+                if (canMove) { this.moveCamera(newDirection) };
                 this.sprite.render(this.screen);
                 await utils.sleep(1000/WALK_FPS/2);
 
-                this.moveCamera(newDirection);
+                if (canMove) { this.moveCamera(newDirection) };
                 this.sprite.render(this.screen);
                 await utils.sleep(1000/WALK_FPS/2);
             } else {
@@ -92,38 +101,10 @@ export class Game {
     }
 
     /**
-     * Moves the background and mainobject layers. Returns true if the camera
-     * was moved, else false indicating there was a collision.
+     * Moves the background and mainobject layers.
      */
-    moveCamera(direction: utils.Direction): boolean {
-        let newTopLeft = <utils.TilePosition> { ...this.topLeft! };
-
-        switch (direction) {
-            case utils.Direction.N:
-                newTopLeft.y -= 1;
-                break;
-            case utils.Direction.E:
-                newTopLeft.x += 1;
-                break;
-            case utils.Direction.S:
-                newTopLeft.y += 1;
-                break;
-            case utils.Direction.W:
-                newTopLeft.x -= 1;
-                break;
-            default:
-                break;
-        }
-
-        // TODO: This has to change when the sprite isn't always centered.
-        let newSpritePosition = new utils.TilePosition(newTopLeft.x + 14, newTopLeft.y + 9);
-
-        let canMove = this.scene!.canMoveTo(newSpritePosition);
-        if (canMove) {
-            this.topLeft = newTopLeft;
-            this.scene!.render(this.screen, this.topLeft!);
-        }
-
-        return canMove;
+    moveCamera(direction: utils.Direction) {
+        let newTopLeft = this.topLeft!.move(direction);
+        this.scene!.render(this.screen, this.topLeft!);
     }
 }

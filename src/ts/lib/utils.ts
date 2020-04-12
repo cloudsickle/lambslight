@@ -32,6 +32,38 @@ export class TilePosition {
         this.x = x;
         this.y = y;
     }
+
+    copy(): TilePosition {
+        return new TilePosition(this.x, this.y);
+    }
+
+    move(direction: Direction): TilePosition {
+        switch (direction) {
+            case Direction.N:
+                this.y -= 1;
+                break;
+            case Direction.E:
+                this.x += 1;
+                break;
+            case Direction.S:
+                this.y += 1;
+                break;
+            case Direction.W:
+                this.x -= 1;
+                break;
+            default:
+                break;
+        }
+
+        return this;
+    }
+
+    shift(dx: number, dy: number): TilePosition {
+        this.x += dx;
+        this.y += dy;
+
+        return this;
+    }
 }
 
 
