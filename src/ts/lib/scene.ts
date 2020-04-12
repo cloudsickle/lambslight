@@ -16,7 +16,6 @@ export class Scene {
 
     canMoveTo(position: utils.TilePosition): boolean {
         // Because sprite occupies four tiles, all need to be walkable.
-        console.log(position);
         return !(
                this.map.collision[this.tileIndex(position.x    , position.y    )] === 1
             || this.map.collision[this.tileIndex(position.x    , position.y + 1)] === 1

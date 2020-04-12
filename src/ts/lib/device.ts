@@ -184,14 +184,23 @@ export class GameInput {
     }
 
     prioritizedArrow(): GameButton | null {
-        if (this.arrowStack) {
-            return this.arrowStack[0];
+        const lastIndex = this.arrowStack.length - 1;
+        if (lastIndex >= 0) {
+            return this.arrowStack[lastIndex];
+        } else {
+            return null;
         }
-        return null;
     }
 
     private handleKeyboard(event: KeyboardEvent) {
         event.preventDefault();
+
+        /*
+         * If more than two arrow keys are being held at the same time, a
+         * KeyboardEvent may not be generated. This is due to keyboard wiring.
+         * In my case, if the down arrow and a side arrow are held, I get no
+         * event if the other side arrow is pressed.
+         */
 
         let button: GameButton | null = null;
         switch (event.keyCode) {
@@ -259,15 +268,12 @@ export class GameInput {
     private pressOrRelease(button: GameButton, press: boolean) {
         this.pressed[button] = press;
 
-        // Special handling for arrows.
-        // FIXME: Still some issues here.
         if (isArrow(button)) {
-            let index = this.arrowStack.indexOf(button);
-            if (index > -1) {
+            const index = this.arrowStack.indexOf(button);
+            if (press && (index === -1)) {
+                this.arrowStack.push(button);
+            } else if (!press) {
                 this.arrowStack.splice(index, 1);
-            }
-            if (press) {
-                this.arrowStack.unshift(button);
             }
         }
     }
