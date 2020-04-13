@@ -197,9 +197,10 @@ export class GameInput {
 
         /*
          * If more than two arrow keys are being held at the same time, a
-         * KeyboardEvent may not be generated. This is due to keyboard wiring.
-         * In my case, if the down arrow and a side arrow are held, I get no
-         * event if the other side arrow is pressed.
+         * KeyboardEvent may not be generated when a third arrow key is pressed.
+         * This is due to keyboard wiring. In my case, if the down arrow key and
+         * a side arrow key are held, I get no event when the other side arrow 
+         * key is pressed.
          */
 
         let button: GameButton | null = null;

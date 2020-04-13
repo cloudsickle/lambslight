@@ -3,19 +3,19 @@ import * as utils  from './utils.js';
 
 const TSIZE = 8;
 
-export class Scene {
+export class Area {
     lastTopLeft: utils.TilePosition | null;
-    map        : SceneMap;
+    map        : AreaMap;
     tiles      : HTMLImageElement;
 
-    constructor(map: SceneMap, tiles: HTMLImageElement) {
+    constructor(map: AreaMap, tiles: HTMLImageElement) {
         this.lastTopLeft = null;
         this.map         = map;
         this.tiles       = tiles;
     }
 
     canMoveTo(position: utils.TilePosition): boolean {
-        // Because sprite occupies four tiles, all need to be walkable.
+        // Because the sprite occupies four tiles, all need to be walkable.
         return !(
                this.map.collision[this.tileIndex(position.x    , position.y    )] === 1
             || this.map.collision[this.tileIndex(position.x    , position.y + 1)] === 1
@@ -48,7 +48,7 @@ export class Scene {
             let dx = this.lastTopLeft.x - topLeft.x;
             let dy = this.lastTopLeft.y - topLeft.y;
 
-            let gapTopLeft = <utils.TilePosition> { ...topLeft };
+            let gapTopLeft = topLeft.copy();
 
             if ((Math.abs(dx) + Math.abs(dy)) === 1) {
                 if (dx === -1) { gapTopLeft.x += screen.width /TSIZE - 1; }
@@ -69,7 +69,7 @@ export class Scene {
             );
         }
 
-        this.lastTopLeft = <utils.TilePosition> { ...topLeft };
+        this.lastTopLeft = topLeft.copy();
     }
 
     renderRect(screen: device.GameScreen, topLeft: utils.TilePosition, hTiles: number,
@@ -127,26 +127,26 @@ export class Scene {
 }
 
 /**
- * Create a new Scene from JSON Scene data.
+ * Create a new Area from JSON Area data.
  */
-export function loadScene(sceneAsset: string): Promise<Scene> {
+export function loadArea(areaAsset: string): Promise<Area> {
     return new Promise((resolve) => {
         let req = new XMLHttpRequest();
-        req.open('GET', '../../assets/scenes/' + sceneAsset);
+        req.open('GET', '../../assets/areas/' + areaAsset);
         req.responseType = 'text';
         req.send();
         req.onload = () => {
-            let map   = <SceneMap> JSON.parse(req.response);
+            let map   = <AreaMap> JSON.parse(req.response);
             let tiles = new Image();
             tiles.onload = () => {
-                resolve(new Scene(map, tiles));
+                resolve(new Area(map, tiles));
             };
             tiles.src = '../../assets/images/' + map.imageAsset;
         };
     });
 }
 
-interface SceneMap {
+interface AreaMap {
     background   : number[];
     collision    : number[];
     height       : number;

@@ -1,5 +1,5 @@
 import * as device from './device.js';
-import * as scene  from './scene.js';
+import * as area  from './area.js';
 import * as sprite from './sprite.js';
 import * as utils  from './utils.js';
 
@@ -7,7 +7,7 @@ const WALK_FPS = 3;
 
 export class Game {
     input  : device.GameInput;
-    scene  : scene.Scene | null;
+    area   : area.Area | null;
     screen : device.GameScreen;
     sprite : sprite.Sprite;
     topLeft: utils.TilePosition | null;
@@ -15,7 +15,7 @@ export class Game {
     constructor() {
         try {
             this.input   = new device.GameInput();
-            this.scene   = null;
+            this.area   = null;
             this.screen  = new device.GameScreen();
             this.sprite  = new sprite.Sprite();
             this.topLeft = null;
@@ -25,14 +25,14 @@ export class Game {
         }
     }
 
-    async load(sceneAsset: string, spriteAsset: string) {
+    async load(areaAsset: string, spriteAsset: string) {
         await this.sprite.loadSpritesheet(spriteAsset);
-        this.scene = await scene.loadScene(sceneAsset);
+        this.area = await area.loadArea(areaAsset);
         this.topLeft = new utils.TilePosition(
-            this.scene.map.startTopLeftX,
-            this.scene.map.startTopLeftY
+            this.area.map.startTopLeftX,
+            this.area.map.startTopLeftY
         );
-        this.scene.render(this.screen, this.topLeft);
+        this.area.render(this.screen, this.topLeft);
         this.sprite.render(this.screen);
     }
 
@@ -61,7 +61,7 @@ export class Game {
             /*
              * If the new direction is different than the current direction, the
              * sprite just turns around in place, the position stays constant.
-             * So we only deal with scene rendering if the sprite direction
+             * So we only deal with area rendering if the sprite direction
              * hasn't changed.
              * 
              * All this is assuming the camera always follows the main character
@@ -83,7 +83,7 @@ export class Game {
                     .move(newDirection)
                     .move(newDirection)
                     .shift(14, 9);
-                let canMove = this.scene!.canMoveTo(newSpritePosition);
+                let canMove = this.area!.canMoveTo(newSpritePosition);
                 
                 if (canMove) { this.moveCamera(newDirection) };
                 this.sprite.render(this.screen);
@@ -107,6 +107,6 @@ export class Game {
      */
     moveCamera(direction: utils.Direction) {
         let newTopLeft = this.topLeft!.move(direction);
-        this.scene!.render(this.screen, this.topLeft!);
+        this.area!.render(this.screen, this.topLeft!);
     }
 }
