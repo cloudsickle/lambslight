@@ -1,5 +1,6 @@
+import * as area   from './area.js';
 import * as device from './device.js';
-import * as area  from './area.js';
+import * as scene  from './scene.js';
 import * as sprite from './sprite.js';
 import * as utils  from './utils.js';
 
@@ -26,6 +27,9 @@ export class Game {
     }
 
     async load(areaAsset: string, spriteAsset: string) {
+        await scene.developer(this.screen);
+        await scene.gameLogo(this.screen);
+
         await this.sprite.loadSpritesheet(spriteAsset);
         this.area = await area.loadArea(areaAsset);
         this.topLeft = new utils.TilePosition(

@@ -58,6 +58,7 @@ CanvasRenderingContext2D.prototype.trace = function(
     console.assert(0 <= tail && tail <= points.length,
                    'CanvasRenderingContext2D.trace: Invalid tail length.');
 
+    // TODO: This might be better using setInterval.
     return new Promise(async (resolve) => {
         for (let i = 0; i < points.length + tail; i++) {
             if (i < points.length) {
