@@ -10,7 +10,7 @@ async function main() {
         console.error(error);
     }
 
-    g!.load('example.json', 'spritesheet.png').then(() => {
+    g!.load('example2.json', 'spritesheet.png').then(() => {
         g!.loop();
     });
 }

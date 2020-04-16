@@ -35,9 +35,9 @@ export class Sprite {
          * the sprite location. This will allow for scenes where the map
          * is frozen and the character walks to a specific location.
          */
-        gameScreen.characters.clearRect(112, 72, 16, 16);
+        gameScreen.characters.clearRect(112, 72 - 4, 16, 16);
         gameScreen.characters.drawImage(this.spritesheet, sx, sy, 16, 16, 112,
-                                        72, 16, 16);
+                                        72 - 4, 16, 16);
     }
 
     private getWalkFrame(): number {
@@ -56,7 +56,7 @@ export class Sprite {
         /*
          * If the current frame is 2, we want to return 0 because the first and
          * third frames are the same image. If it's 3, we return 2 because the
-         * spritesheet only stores each frame once so the third row is the
+         * spritesheet only stores each frame once, so the third row is the
          * fourth frame in the sequence.
          * 0 -> 0, 1 -> 1, 2 -> 0, 3 -> 2
          */

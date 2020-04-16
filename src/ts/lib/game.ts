@@ -16,7 +16,7 @@ export class Game {
     constructor() {
         try {
             this.input   = new device.GameInput();
-            this.area   = null;
+            this.area    = null;
             this.screen  = new device.GameScreen();
             this.sprite  = new sprite.Sprite();
             this.topLeft = null;
@@ -31,7 +31,7 @@ export class Game {
         await scene.gameLogo(this.screen);
 
         await this.sprite.loadSpritesheet(spriteAsset);
-        this.area = await area.loadArea(areaAsset);
+        this.area    = await area.loadArea(areaAsset);
         this.topLeft = new utils.TilePosition(
             this.area.map.startTopLeftX,
             this.area.map.startTopLeftY

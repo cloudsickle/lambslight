@@ -107,8 +107,10 @@ export class Area {
                 if (moTile > 0) {
                     screen.background.drawImage(
                         this.tiles,
-                        (moTile % TSIZE)*TSIZE,  // FIXME: This needs to factor in tilemap width.
-                        Math.floor(moTile/TSIZE)*TSIZE,
+                        // (moTile % TSIZE)*TSIZE,  // FIXME: This needs to factor in tilemap width.
+                        moTile*TSIZE,
+                        // Math.floor(moTile/TSIZE)*TSIZE,
+                        0,
                         TSIZE,
                         TSIZE,
                         (i + offsetX)*TSIZE,

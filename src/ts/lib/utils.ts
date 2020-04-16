@@ -25,7 +25,7 @@ export class Position {
 }
 
 /**
- * Poisiton class in tile units. Used for type-safety.
+ * Position class in tile units. Used for type-safety.
  */
 export class TilePosition {
     constructor(public x: number, public y: number) {
