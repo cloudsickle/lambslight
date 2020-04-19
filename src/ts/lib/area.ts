@@ -103,7 +103,7 @@ export class Area {
                 );
 
                 if (moTile > 0) {
-                    screen.background.drawImage(
+                    screen.mainobject.drawImage(
                         this.tiles,
                         (moTile % this.map.tileMapWidth)*TSIZE,
                         Math.floor(moTile/this.map.tileMapWidth)*TSIZE,
