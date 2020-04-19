@@ -1,5 +1,6 @@
 {
     "imageAsset" : "areaexample.png",
+    "tileMapWidth": 2,
     "width" : 48,
     "height": 32,
     "startTopLeftX": 0,

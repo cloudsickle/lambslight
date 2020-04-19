@@ -92,10 +92,8 @@ export class Area {
 
                 screen.background.drawImage(
                     this.tiles,
-                    // (bgTile % TSIZE)*TSIZE,  // FIXME: This needs to factor in tilemap width.
-                    bgTile*TSIZE,
-                    // Math.floor(bgTile/TSIZE)*TSIZE,
-                    0,
+                    (bgTile % this.map.tileMapWidth)*TSIZE,
+                    Math.floor(bgTile/this.map.tileMapWidth)*TSIZE,
                     TSIZE,
                     TSIZE,
                     (i + offsetX)*TSIZE,
@@ -107,10 +105,8 @@ export class Area {
                 if (moTile > 0) {
                     screen.background.drawImage(
                         this.tiles,
-                        // (moTile % TSIZE)*TSIZE,  // FIXME: This needs to factor in tilemap width.
-                        moTile*TSIZE,
-                        // Math.floor(moTile/TSIZE)*TSIZE,
-                        0,
+                        (moTile % this.map.tileMapWidth)*TSIZE,
+                        Math.floor(moTile/this.map.tileMapWidth)*TSIZE,
                         TSIZE,
                         TSIZE,
                         (i + offsetX)*TSIZE,
@@ -156,5 +152,6 @@ interface AreaMap {
     mainobject   : number[];
     startTopLeftX: number;
     startTopLeftY: number;
+    tileMapWidth : number;
     width        : number;
 }
